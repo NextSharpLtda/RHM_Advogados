@@ -1,7 +1,7 @@
 # RHM Advogados — Site Oficial Completo
 
-**Site:** [thiagoandrade07.github.io/RHA_Advogados](https://thiagoandrade07.github.io/RHA_Advogados/)  
-**Repositório:** [ThiagoAndrade07/RHA_Advogados](https://github.com/ThiagoAndrade07/RHA_Advogados)
+**Site:** GitHub Pages do repositório (quando habilitado).  
+**Repositório:** [NextSharpLtda/RHM_Advogados](https://github.com/NextSharpLtda/RHM_Advogados)
 
 Site estático em HTML, CSS e JavaScript, baseado na tela **RHM Advogados - Versão Sessão 44 com Seções Intercaladas** do projeto **RHM ADVOGADOS**, no Stitch.
 
