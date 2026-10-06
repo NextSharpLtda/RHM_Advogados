@@ -32,5 +32,5 @@ const built = await readFile(path.join(root, 'dist/index.html'), 'utf8');
 assert(built.includes('RHM Advogados') && built.includes('contact-form'), 'Build incompleto');
 await access(path.join(root, 'dist', 'privacidade.html'));
 const builtTrafficPage = await readFile(path.join(root, 'dist/acidentes-transito.html'), 'utf8');
-assert(builtTrafficPage.includes('id="video-seguro"') && builtTrafficPage.includes('id="video-indenizacoes"') && builtTrafficPage.includes('id="video-providencias"'), 'Página de acidentes de trânsito incompleta');
+assert(builtTrafficPage.includes('Seguro e negativa de cobertura') && builtTrafficPage.includes('Indenizações após um acidente') && builtTrafficPage.includes('O que fazer depois de um acidente?') && !builtTrafficPage.includes('id="video-seguro"'), 'Página de acidentes de trânsito incompleta');
 console.log(`OK: ${ids.length} IDs, design Stitch, formulário e WhatsApp verificados.`);
