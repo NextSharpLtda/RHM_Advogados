@@ -33,4 +33,5 @@ assert(built.includes('RHM Advogados') && built.includes('contact-form'), 'Build
 await access(path.join(root, 'dist', 'privacidade.html'));
 const builtTrafficPage = await readFile(path.join(root, 'dist/acidentes-transito.html'), 'utf8');
 assert(builtTrafficPage.includes('Seguro e negativa de cobertura') && builtTrafficPage.includes('Indenizações após um acidente') && builtTrafficPage.includes('O que fazer depois de um acidente?') && !builtTrafficPage.includes('id="video-seguro"'), 'Página de acidentes de trânsito incompleta');
+assert((builtTrafficPage.match(/data-form-cta/g) || []).length >= 7 && !builtTrafficPage.includes('data-whatsapp-cta'), 'CTAs da página de acidentes devem levar ao formulário');
 console.log(`OK: ${ids.length} IDs, design Stitch, formulário e WhatsApp verificados.`);

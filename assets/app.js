@@ -9,7 +9,8 @@
   document.querySelectorAll('[data-form-cta]').forEach((link) => {
     link.addEventListener('click', (event) => {
       event.preventDefault();
-      document.querySelector('#contato')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const target = link.dataset.formTarget || '#contato';
+      document.querySelector(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
