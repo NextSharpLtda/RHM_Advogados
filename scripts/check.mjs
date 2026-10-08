@@ -6,6 +6,16 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const html = await readFile(path.join(root, 'index.html'), 'utf8');
+const trafficPage = await readFile(path.join(root, 'acidentes-transito.html'), 'utf8');
+const privacyPage = await readFile(path.join(root, 'privacidade.html'), 'utf8');
+const assertGtmInstallation = (page, fileName) => {
+  assert.equal((page.match(/GTM-PHGL7XLT/g) || []).length, 2, `${fileName}: o container GTM deve aparecer exatamente no script e no noscript`);
+  assert(page.indexOf('googletagmanager.com/gtm.js') < page.indexOf('</head>'), `${fileName}: script do GTM ausente no head`);
+  assert(page.indexOf('<body') < page.indexOf('googletagmanager.com/ns.html'), `${fileName}: noscript do GTM deve estar no body`);
+};
+assertGtmInstallation(html, 'index.html');
+assertGtmInstallation(trafficPage, 'acidentes-transito.html');
+assertGtmInstallation(privacyPage, 'privacidade.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
 assert.equal(ids.length, new Set(ids).size, 'IDs duplicados');
 for (const [, attribute, value] of html.matchAll(/\b(src|href)="([^"]+)"/g)) {
