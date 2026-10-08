@@ -10,7 +10,12 @@ assert.equal(ids.length, new Set(ids).size, 'IDs duplicados');
 for (const [, attribute, value] of html.matchAll(/\b(src|href)="([^"]+)"/g)) {
   if (value.startsWith('#')) assert(ids.includes(value.slice(1)), `Âncora inexistente: ${value}`);
   if (value.startsWith('./')) await access(path.join(root, value));
-  if (attribute === 'src' && value.startsWith('http')) assert(value.startsWith('https://lh3.googleusercontent.com/'), `Imagem remota não permitida: ${value}`);
+  if (attribute === 'src' && value.startsWith('http')) {
+    assert(
+      value.startsWith('https://lh3.googleusercontent.com/') || value.startsWith('https://www.googletagmanager.com/'),
+      `Imagem remota não permitida: ${value}`,
+    );
+  }
 }
 assert(!html.includes('cdn.tailwindcss.com'), 'Tailwind de desenvolvimento presente');
 assert(!html.includes('fonts.googleapis.com'), 'Fonte externa desnecessária presente');
