@@ -6,6 +6,19 @@
   const validWhatsApp = /^\d{10,15}$/.test(whatsapp);
   const greeting = 'Olá! Vim pelo site da RHM Advogados e gostaria de falar com a equipe sobre uma possível assessoria jurídica.';
   const makeWhatsAppUrl = (message) => `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`;
+  const trackedEvents = new Set();
+  const trackOnce = (eventName) => {
+    if (trackedEvents.has(eventName)) return;
+    trackedEvents.add(eventName);
+
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: eventName });
+    } catch {
+      // O rastreamento nunca deve impedir o acesso ao WhatsApp.
+    }
+  };
+
   document.querySelectorAll('[data-form-cta]').forEach((link) => {
     link.addEventListener('click', (event) => {
       event.preventDefault();
@@ -54,6 +67,8 @@
     const message = [greeting, '', 'Dados informados:', ...details].join('\n');
     status.hidden = false;
     status.textContent = 'Uma nova aba do WhatsApp foi aberta para você confirmar o envio.';
+    trackOnce('filtro_concluido');
+    trackOnce('whatsapp_pos_filtro');
     window.open(makeWhatsAppUrl(message), '_blank', 'noopener,noreferrer');
   });
 })();

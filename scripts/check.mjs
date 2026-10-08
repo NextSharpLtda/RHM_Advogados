@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -33,6 +34,48 @@ const contactConfig = await readFile(path.join(root, 'assets/site-config.js'), '
 const appScript = await readFile(path.join(root, 'assets/app.js'), 'utf8');
 assert(contactConfig.includes("whatsapp: '5541992031547'"), 'Número de WhatsApp ausente');
 assert(appScript.includes("window.open(makeWhatsAppUrl(message), '_blank'"), 'Envio em nova aba ausente');
+assert(appScript.includes("trackOnce('filtro_concluido')"), 'Evento de conclusão do filtro ausente');
+assert(appScript.includes("trackOnce('whatsapp_pos_filtro')"), 'Evento de acesso ao WhatsApp ausente');
+assert(appScript.indexOf("trackOnce('filtro_concluido')") < appScript.indexOf("trackOnce('whatsapp_pos_filtro')"), 'Eventos fora da sequência esperada');
+assert(appScript.indexOf("trackOnce('whatsapp_pos_filtro')") < appScript.indexOf('window.open(makeWhatsAppUrl(message)'), 'Evento do WhatsApp deve ocorrer antes da navegação');
+
+let submitHandler;
+let formIsValid = false;
+const openedUrls = [];
+const status = { hidden: true, textContent: '' };
+const form = {
+  addEventListener: (eventName, handler) => {
+    if (eventName === 'submit') submitHandler = handler;
+  },
+  reportValidity: () => formIsValid,
+};
+const browserWindow = {
+  RHM_CONFIG: { whatsapp: '5541992031547' },
+  open: (...args) => openedUrls.push(args),
+};
+vm.runInNewContext(appScript, {
+  window: browserWindow,
+  document: {
+    querySelector: (selector) => ({ '#contact-form': form, '#contact-status': status })[selector] || null,
+    querySelectorAll: () => [],
+  },
+  FormData: class {
+    entries() { return [['Nome', 'Teste GTM']][Symbol.iterator](); }
+  },
+  Set,
+  encodeURIComponent,
+});
+assert.equal(typeof submitHandler, 'function', 'Handler de envio do formulário ausente');
+const submit = () => submitHandler({ preventDefault() {} });
+submit();
+assert.deepEqual(browserWindow.dataLayer, undefined, 'Formulário incompleto não deve gerar eventos');
+assert.equal(openedUrls.length, 0, 'Formulário incompleto não deve abrir o WhatsApp');
+formIsValid = true;
+submit();
+assert.equal(JSON.stringify(browserWindow.dataLayer.map(({ event }) => event)), JSON.stringify(['filtro_concluido', 'whatsapp_pos_filtro']), 'Eventos de conversão incorretos');
+assert.equal(openedUrls.length, 1, 'Envio válido deve abrir o WhatsApp uma vez');
+submit();
+assert.equal(JSON.stringify(browserWindow.dataLayer.map(({ event }) => event)), JSON.stringify(['filtro_concluido', 'whatsapp_pos_filtro']), 'Eventos de conversão não devem duplicar');
 const built = await readFile(path.join(root, 'dist/index.html'), 'utf8');
 assert(built.includes('RHM Advogados') && built.includes('contact-form'), 'Build incompleto');
 await access(path.join(root, 'dist', 'privacidade.html'));
